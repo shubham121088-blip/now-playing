@@ -1,82 +1,179 @@
 import React, { useState, useEffect } from 'react';
-import { Maximize, Minimize, Mic2 } from 'lucide-react';
+import { 
+  Play, 
+  Pause, 
+  SkipBack, 
+  SkipForward, 
+  Volume2, 
+  VolumeX, 
+  Heart, 
+  Repeat, 
+  Shuffle, 
+  Music2, 
+  MoreHorizontal, 
+  Maximize2 
+} from 'lucide-react';
 
 export default function App() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showLyrics, setShowLyrics] = useState(false);
-  const [lyrics, setLyrics] = useState<string>("Loading lyrics...");
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(45); // Current progress in seconds
+  const [volume, setVolume] = useState<number>(80);
+  const duration = 214; // Total duration in seconds (3:34)
 
-  // Fullscreen toggle logic
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.error(`Error enabling fullscreen: ${err.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
+  const track = {
+    title: "Himalayan Breeze",
+    artist: "Aether & The Nomads",
+    album: "Roads Less Traveled (Deluxe Edition)",
+    coverUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80",
   };
 
-  // Keep state updated if user exits via ESC key
+  // Simulate progress when playing
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+    let timer: NodeJS.Timeout;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setProgress((prev) => (prev >= duration ? 0 : prev + 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isPlaying, duration]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   return (
-    <div className="relative w-full h-screen bg-black flex items-center justify-center overflow-hidden">
-      
-      {/* --- TOP RIGHT: Fullscreen Toggle Button --- */}
-      <button
-        onClick={toggleFullscreen}
-        className="fixed top-4 right-4 z-50 p-3 bg-black/60 hover:bg-black text-white/80 hover:text-white rounded-full transition-all border border-white/10"
-        title="Toggle Fullscreen"
-      >
-        {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-      </button>
-
-      {/* --- TOP LEFT: Lyrics Toggle Button --- */}
-      <button
-        onClick={() => setShowLyrics(!showLyrics)}
-        className={`fixed top-4 left-4 z-50 p-3 rounded-full transition-all border border-white/10 ${
-          showLyrics ? 'bg-white text-black' : 'bg-black/60 text-white/80 hover:bg-black hover:text-white'
-        }`}
-        title="Toggle Lyrics"
-      >
-        <Mic2 size={20} />
-      </button>
-
-      {/* --- MAIN CONTENT (Vinyl / Player) --- */}
-      <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showLyrics ? 'md:-translate-x-32' : 'translate-x-0'}`}>
-        <div className="text-white text-center">
-          <p className="text-2xl font-bold tracking-wider">Now Playing</p>
-          <p className="text-white/60 text-sm mt-2">Vinyl Player Component</p>
+    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 font-sans text-neutral-100">
+      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+        
+        {/* Top App Bar */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+            <Music2 className="w-4 h-4 text-emerald-500 animate-pulse" />
+            <span>Playing from Playlist</span>
+          </div>
+          <button className="text-neutral-400 hover:text-white transition-colors">
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
         </div>
-      </div>
 
-      {/* --- SLIDING LYRICS PANEL --- */}
-      {showLyrics && (
-        <div className="absolute right-8 w-full md:w-1/3 h-[80vh] bg-black/90 border border-white/10 rounded-2xl p-6 flex flex-col text-white overflow-hidden shadow-2xl">
-          <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <h2 className="text-lg font-bold tracking-wide">Lyrics</h2>
+        {/* Album Artwork Section */}
+        <div className="px-6 py-4">
+          <div className="relative aspect-square w-full rounded-xl overflow-hidden shadow-lg group">
+            <img 
+              src={track.coverUrl} 
+              alt={track.album}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {/* Live Equalizer Bars Overlay if Playing */}
+            {isPlaying && (
+              <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <span className="w-1 h-3 bg-emerald-400 animate-bounce rounded-full"></span>
+                <span className="w-1 h-5 bg-emerald-400 animate-bounce delay-100 rounded-full"></span>
+                <span className="w-1 h-2 bg-emerald-400 animate-bounce delay-200 rounded-full"></span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Track Info & Like Button */}
+        <div className="px-6 py-2 flex items-center justify-between">
+          <div className="space-y-1 overflow-hidden pr-2">
+            <h2 className="text-xl font-bold truncate text-white tracking-tight">{track.title}</h2>
+            <p className="text-sm text-neutral-400 truncate">{track.artist}</p>
+          </div>
+          <button 
+            onClick={() => setIsLiked(!isLiked)}
+            className="text-neutral-400 hover:text-white transition-transform active:scale-90 p-2"
+          >
+            <Heart 
+              className={`w-6 h-6 ${isLiked ? 'text-emerald-500 fill-emerald-500' : ''}`} 
+            />
+          </button>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="px-6 py-4 space-y-2">
+          <div className="relative group cursor-pointer">
+            <input 
+              type="range" 
+              min={0} 
+              max={duration} 
+              value={progress}
+              onChange={(e) => setProgress(Number(e.target.value))}
+              className="w-full h-1.5 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all"
+            />
+          </div>
+          <div className="flex justify-between text-xs text-neutral-400 font-medium">
+            <span>{formatTime(progress)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Main Controls */}
+        <div className="px-6 py-2 flex items-center justify-between">
+          <button className="text-neutral-400 hover:text-white transition-colors">
+            <Shuffle className="w-5 h-5" />
+          </button>
+          
+          <button className="text-neutral-200 hover:text-white transition-transform active:scale-90">
+            <SkipBack className="w-6 h-6 fill-neutral-200" />
+          </button>
+
+          <button 
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-lg hover:scale-105 active:scale-95 transition-all"
+          >
+            {isPlaying ? (
+              <Pause className="w-7 h-7 fill-black" />
+            ) : (
+              <Play className="w-7 h-7 fill-black ml-1" />
+            )}
+          </button>
+
+          <button className="text-neutral-200 hover:text-white transition-transform active:scale-90">
+            <SkipForward className="w-6 h-6 fill-neutral-200" />
+          </button>
+
+          <button className="text-neutral-400 hover:text-white transition-colors">
+            <Repeat className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Footer Volume & Extra Tools */}
+        <div className="px-6 py-6 flex items-center justify-between border-t border-neutral-800/60 mt-4">
+          <div className="flex items-center gap-3 w-1/2">
             <button 
-              onClick={() => setShowLyrics(false)}
-              className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all text-xs text-white"
+              onClick={() => setIsMuted(!isMuted)}
+              className="text-neutral-400 hover:text-white transition-colors"
             >
-              ✕
+              {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </button>
+            <input 
+              type="range" 
+              min={0} 
+              max={100} 
+              value={isMuted ? 0 : volume}
+              onChange={(e) => {
+                setVolume(Number(e.target.value));
+                if (isMuted) setIsMuted(false);
+              }}
+              className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-300 hover:accent-white transition-all"
+            />
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button className="text-neutral-400 hover:text-white transition-colors">
+              <Maximize2 className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto text-white/80 text-base space-y-4 text-center">
-            <p className="whitespace-pre-wrap font-sans leading-relaxed">{lyrics}</p>
-          </div>
         </div>
-      )}
 
+      </div>
     </div>
   );
 }
