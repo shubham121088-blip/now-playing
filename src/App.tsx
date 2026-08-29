@@ -59,36 +59,36 @@ export default function App() {
       {/* Main Content Area */}
       <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showLyrics ? 'md:-translate-x-32' : 'translate-x-0'}`}>
         
-        {/* Turntable Container */}
-        <div className="relative flex items-center justify-center mb-8 w-80 h-80">
+        {/* Turntable Container: Album Art & Vinyl Side-by-Side */}
+        <div className="relative flex items-center justify-center mb-8">
           
-          {/* Spinning Vinyl Record (Pokes out to the right when playing) */}
-          <div 
-            className={`absolute right-0 w-72 h-72 md:w-80 md:h-80 bg-neutral-900 rounded-full border-4 border-neutral-800 flex items-center justify-center shadow-2xl transition-transform duration-1000 ${
-              isPlaying ? 'animate-spin' : ''
-            }`}
-            style={{ animationDuration: '6s', willChange: 'transform' }}
-          >
-            <div className="absolute w-60 h-60 rounded-full border border-neutral-800/60"></div>
-            <div className="absolute w-44 h-44 rounded-full border border-neutral-800/60"></div>
-            <div className="absolute w-28 h-28 rounded-full border border-neutral-800/60"></div>
-            <div className="absolute w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-inner">
-              <Disc className="w-8 h-8 text-neutral-950" />
-            </div>
-          </div>
-
-          {/* Album Cover Art (Positioned cleanly on the left overlapping the vinyl) */}
-          <div className="absolute left-0 z-10 w-64 h-64 md:w-72 md:h-72 rounded-xl overflow-hidden shadow-2xl border border-neutral-800">
+          {/* Album Cover Art (Sits on top with z-index) */}
+          <div className="relative z-20 w-64 h-64 md:w-72 md:h-72 rounded-xl overflow-hidden shadow-2xl border border-neutral-800 shrink-0">
             <img 
               src={track.coverUrl} 
               alt={track.title}
               className="w-full h-full object-cover"
             />
           </div>
+
+          {/* Spinning Vinyl Record (Pokes out to the right naturally from behind) */}
+          <div 
+            className={`absolute -right-16 w-64 h-64 md:w-72 md:h-72 bg-neutral-900 rounded-full border-4 border-neutral-800 flex items-center justify-center shadow-2xl z-10 transition-transform duration-1000 ${
+              isPlaying ? 'animate-spin' : ''
+            }`}
+            style={{ animationDuration: '6s', willChange: 'transform' }}
+          >
+            <div className="absolute w-52 h-52 rounded-full border border-neutral-800/60"></div>
+            <div className="absolute w-36 h-36 rounded-full border border-neutral-800/60"></div>
+            <div className="absolute w-20 h-20 rounded-full border border-neutral-800/60"></div>
+            <div className="absolute w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center shadow-inner">
+              <Disc className="w-6 h-6 text-neutral-950" />
+            </div>
+          </div>
         </div>
 
         {/* Track Info */}
-        <div className="text-center z-10 space-y-1">
+        <div className="text-center z-20 space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">{track.title}</h1>
           <p className="text-neutral-400 text-sm">{track.artist}</p>
         </div>
@@ -96,7 +96,7 @@ export default function App() {
         {/* Play/Pause Control */}
         <button 
           onClick={() => setIsPlaying(!isPlaying)}
-          className="mt-6 z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
+          className="mt-6 z-20 w-12 h-12 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
         >
           {isPlaying ? <Pause className="w-5 h-5 fill-black" /> : <Play className="w-5 h-5 fill-black ml-0.5" />}
         </button>
