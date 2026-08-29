@@ -1,179 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Volume2, 
-  VolumeX, 
-  Heart, 
-  Repeat, 
-  Shuffle, 
-  Music2, 
-  MoreHorizontal, 
-  Maximize2 
-} from 'lucide-react';
+import { Maximize, Minimize, Mic2, Disc, Play, Pause } from 'lucide-react';
 
 export default function App() {
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [isLiked, setIsLiked] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(45); // Current progress in seconds
-  const [volume, setVolume] = useState<number>(80);
-  const duration = 214; // Total duration in seconds (3:34)
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [lyrics] = useState<string>("🎶 Instrumental Introduction 🎶\n\nStrumming through the mountain roads,\nCarrying the weight and loads,\nHimalayan breeze is calling out my name,\nNothing ever feels the same.\n\n(Enjoy the vibe...)");
+
+  // Fullscreen toggle logic
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error enabling fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const track = {
     title: "Himalayan Breeze",
     artist: "Aether & The Nomads",
-    album: "Roads Less Traveled (Deluxe Edition)",
     coverUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80",
   };
 
-  // Simulate progress when playing
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isPlaying) {
-      timer = setInterval(() => {
-        setProgress((prev) => (prev >= duration ? 0 : prev + 1));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isPlaying, duration]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 font-sans text-neutral-100">
-      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
-        
-        {/* Top App Bar */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-2">
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
-            <Music2 className="w-4 h-4 text-emerald-500 animate-pulse" />
-            <span>Playing from Playlist</span>
-          </div>
-          <button className="text-neutral-400 hover:text-white transition-colors">
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
-        </div>
+    <div className="relative w-full h-screen bg-neutral-950 flex items-center justify-center overflow-hidden font-sans text-white">
+      
+      {/* --- TOP RIGHT: Fullscreen Toggle Button --- */}
+      <button
+        onClick={toggleFullscreen}
+        className="fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 hover:bg-neutral-800 text-white rounded-full transition-all border border-neutral-800 shadow-lg"
+        title="Toggle Fullscreen"
+      >
+        {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+      </button>
 
-        {/* Album Artwork Section */}
-        <div className="px-6 py-4">
-          <div className="relative aspect-square w-full rounded-xl overflow-hidden shadow-lg group">
+      {/* --- TOP LEFT: Lyrics Toggle Button --- */}
+      <button
+        onClick={() => setShowLyrics(!showLyrics)}
+        className={`fixed top-6 left-6 z-50 p-3 rounded-full transition-all border border-neutral-800 shadow-lg ${
+          showLyrics ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-neutral-900/80 text-white hover:bg-neutral-800'
+        }`}
+        title="Toggle Lyrics"
+      >
+        <Mic2 size={20} />
+      </button>
+
+      {/* --- MAIN CONTENT (Spinning Vinyl & Player) --- */}
+      <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showLyrics ? 'md:-translate-x-32' : 'translate-x-0'}`}>
+        
+        {/* Vinyl & Album Art Container */}
+        <div className="relative flex items-center justify-center mb-8">
+          
+          {/* Spinning Vinyl Record Behind Album Art */}
+          <div 
+            className={`absolute w-72 h-72 md:w-80 md:h-80 bg-neutral-900 rounded-full border-4 border-neutral-800 flex items-center justify-center shadow-2xl transition-transform duration-1000 ${
+              isPlaying ? 'animate-spin' : ''
+            }`}
+            style={{ animationDuration: '6s', willChange: 'transform' }}
+          >
+            {/* Vinyl Grooves Simulation */}
+            <div className="absolute w-60 h-60 rounded-full border border-neutral-800/60"></div>
+            <div className="absolute w-44 h-44 rounded-full border border-neutral-800/60"></div>
+            <div className="absolute w-28 h-28 rounded-full border border-neutral-800/60"></div>
+            {/* Center Vinyl Label */}
+            <div className="absolute w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-inner">
+              <Disc className="w-8 h-8 text-neutral-950" />
+            </div>
+          </div>
+
+          {/* Album Cover Art (Sits on top with slight offset for the vinyl look) */}
+          <div className="relative z-10 w-64 h-64 md:w-72 md:h-72 rounded-xl overflow-hidden shadow-2xl border border-neutral-800 ml-12">
             <img 
               src={track.coverUrl} 
-              alt={track.album}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            {/* Live Equalizer Bars Overlay if Playing */}
-            {isPlaying && (
-              <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <span className="w-1 h-3 bg-emerald-400 animate-bounce rounded-full"></span>
-                <span className="w-1 h-5 bg-emerald-400 animate-bounce delay-100 rounded-full"></span>
-                <span className="w-1 h-2 bg-emerald-400 animate-bounce delay-200 rounded-full"></span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Track Info & Like Button */}
-        <div className="px-6 py-2 flex items-center justify-between">
-          <div className="space-y-1 overflow-hidden pr-2">
-            <h2 className="text-xl font-bold truncate text-white tracking-tight">{track.title}</h2>
-            <p className="text-sm text-neutral-400 truncate">{track.artist}</p>
-          </div>
-          <button 
-            onClick={() => setIsLiked(!isLiked)}
-            className="text-neutral-400 hover:text-white transition-transform active:scale-90 p-2"
-          >
-            <Heart 
-              className={`w-6 h-6 ${isLiked ? 'text-emerald-500 fill-emerald-500' : ''}`} 
-            />
-          </button>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="px-6 py-4 space-y-2">
-          <div className="relative group cursor-pointer">
-            <input 
-              type="range" 
-              min={0} 
-              max={duration} 
-              value={progress}
-              onChange={(e) => setProgress(Number(e.target.value))}
-              className="w-full h-1.5 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all"
+              alt={track.title}
+              className="w-full h-full object-cover"
             />
           </div>
-          <div className="flex justify-between text-xs text-neutral-400 font-medium">
-            <span>{formatTime(progress)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
         </div>
 
-        {/* Main Controls */}
-        <div className="px-6 py-2 flex items-center justify-between">
-          <button className="text-neutral-400 hover:text-white transition-colors">
-            <Shuffle className="w-5 h-5" />
-          </button>
-          
-          <button className="text-neutral-200 hover:text-white transition-transform active:scale-90">
-            <SkipBack className="w-6 h-6 fill-neutral-200" />
-          </button>
-
-          <button 
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-lg hover:scale-105 active:scale-95 transition-all"
-          >
-            {isPlaying ? (
-              <Pause className="w-7 h-7 fill-black" />
-            ) : (
-              <Play className="w-7 h-7 fill-black ml-1" />
-            )}
-          </button>
-
-          <button className="text-neutral-200 hover:text-white transition-transform active:scale-90">
-            <SkipForward className="w-6 h-6 fill-neutral-200" />
-          </button>
-
-          <button className="text-neutral-400 hover:text-white transition-colors">
-            <Repeat className="w-5 h-5" />
-          </button>
+        {/* Track Info */}
+        <div className="text-center z-10 space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">{track.title}</h1>
+          <p className="text-neutral-400 text-sm">{track.artist}</p>
         </div>
 
-        {/* Footer Volume & Extra Tools */}
-        <div className="px-6 py-6 flex items-center justify-between border-t border-neutral-800/60 mt-4">
-          <div className="flex items-center gap-3 w-1/2">
-            <button 
-              onClick={() => setIsMuted(!isMuted)}
-              className="text-neutral-400 hover:text-white transition-colors"
-            >
-              {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
-            <input 
-              type="range" 
-              min={0} 
-              max={100} 
-              value={isMuted ? 0 : volume}
-              onChange={(e) => {
-                setVolume(Number(e.target.value));
-                if (isMuted) setIsMuted(false);
-              }}
-              className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-300 hover:accent-white transition-all"
-            />
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <button className="text-neutral-400 hover:text-white transition-colors">
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
+        {/* Play/Pause Quick Control */}
+        <button 
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="mt-6 z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
+        >
+          {isPlaying ? <Pause className="w-5 h-5 fill-black" /> : <Play className="w-5 h-5 fill-black ml-0.5" />}
+        </button>
       </div>
+
+      {/* --- SLIDING LYRICS PANEL --- */}
+      {showLyrics && (
+        <div className="absolute right-8 w-full md:w-1/3 h-[75vh] bg-neutral-900/90 border border-neutral-800 rounded-2xl p-6 flex flex-col text-white overflow-hidden shadow-2xl z-40 backdrop-blur-md">
+          <div className="flex justify-between items-center mb-4 border-b border-neutral-800 pb-3">
+            <h2 className="text-lg font-bold tracking-wide flex items-center gap-2">
+              <Mic2 className="w-4 h-4 text-emerald-400" /> Lyrics
+            </h2>
+            <button 
+              onClick={() => setShowLyrics(false)}
+              className="p-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-full transition-all text-xs text-white"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto text-neutral-300 text-base space-y-4 text-center">
+            <pre className="whitespace-pre-wrap font-sans leading-relaxed">{lyrics}</pre>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
