@@ -7,18 +7,19 @@ export function App() {
 
 export default App;
 
-import FullscreenButton from './components/FullscreenButton'; // Adjust path if it's right in src/
+import FullscreenButton from './components/FullscreenButton'; // Change to './FullscreenButton' if it's directly in the src folder
 
 export default function App() {
   return (
     <div className="relative w-full h-screen bg-black flex items-center justify-center overflow-hidden">
       
-      {/* Your Fullscreen Button */}
+      {/* Fullscreen Toggle Button */}
       <FullscreenButton />
 
-      {/* Your Vinyl / Player Code goes here */}
-      <div className="text-white">
-        <p>Your Vinyl Player</p>
+      {/* Main Vinyl / Player Area */}
+      <div className="text-white text-center">
+        <p className="text-2xl font-bold tracking-wider">Now Playing</p>
+        <p className="text-white/60 text-sm mt-2">Vinyl Player Component</p>
       </div>
 
     </div>
