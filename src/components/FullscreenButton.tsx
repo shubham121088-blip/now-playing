@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 
 export default function FullscreenButton() {
@@ -27,10 +27,11 @@ export default function FullscreenButton() {
   return (
     <button
       onClick={toggleFullscreen}
-      className="fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 hover:bg-neutral-800 text-white rounded-full transition-all border border-neutral-800 shadow-lg"
+      style={{ zIndex: 999999 }}
+      className="fixed top-6 right-6 p-4 bg-zinc-900/90 hover:bg-black text-white rounded-full shadow-2xl border border-white/20 transition-all cursor-pointer flex items-center justify-center"
       title="Toggle Fullscreen"
     >
-      {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+      {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
     </button>
   );
 }
