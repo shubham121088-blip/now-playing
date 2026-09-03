@@ -7,7 +7,7 @@ export function App() {
 
 export default App;
 
-import FullscreenButton from './components/FullscreenButton'; // Change to './FullscreenButton' if it's directly in the src folder
+import FullscreenButton from './components/FullscreenButton';
 
 export default function App() {
   return (
